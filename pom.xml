@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.dandudzi</groupId>
-    <artifactId>java-list-node</artifactId>
+    <artifactId>java-interview-data-structures</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>

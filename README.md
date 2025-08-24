@@ -1,2 +1,2 @@
-# java-list-node
-Simple Class for list node used for leetcode
+# What
+Repository contains simple data structures used during interviews for java language
