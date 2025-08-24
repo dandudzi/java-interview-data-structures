@@ -16,5 +16,5 @@ jobs:
         with:
           java-version: '24'
           distribution: 'temurin'
-      - name: Run and test
+      - name: Build and test
         run: mvn -B clean install -ntp
