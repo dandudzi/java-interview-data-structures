@@ -1,5 +1,6 @@
 package interview.data.structures;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -18,19 +19,28 @@ public final class ListNode<T> {
         this.nextNode = nextNode;
     }
 
-    public static <T> ListNode of(T value) {
+    public static <T> ListNode<T> of(T value) {
+        if (value != null && value.getClass().isArray()) {
+            if (!Number.class.isAssignableFrom(value.getClass().getComponentType()) &&
+                    !String.class.isAssignableFrom(value.getClass().getComponentType()) &&
+                        !Character.class.isAssignableFrom(value.getClass().getComponentType())) {
+                throw new IllegalArgumentException("Object is not an array of the specified type.");
+            }
+            T[] values = (T[]) value;
+            return ListNode.of(Arrays.asList(values));
+        }
         return new ListNode(value, null);
     }
 
-    public static <T> ListNode of(T value, ListNode<T> nextNode) {
+    public static <T> ListNode<T> of(T value, ListNode<T> nextNode) {
         return new ListNode(value, nextNode);
     }
 
-    public static <T> ListNode of(Iterable<T> values) {
+    public static <T> ListNode<T> of(Iterable<T> values) {
         if (values == null || !values.iterator().hasNext()) {
             return of((T) null);
         }
-        var head = new ListNode<>();
+        var head = new ListNode<T>();
         var next = head;
         var prev = head;
         for (T value : values) {
@@ -51,23 +61,31 @@ public final class ListNode<T> {
     }
 
     private static <T> boolean circularBreaker(ListNode<T> leftHead, ListNode<T> rightHead, BiFunction<ListNode<T>, ListNode<T>, Boolean> function) {
-        Set<ListNode<T>> visitedLeft = new HashSet<>();
-        Set<ListNode<T>> visitedRight = new HashSet<>();
-        var left = leftHead;
-        var right = rightHead;
-        while (left != null && right != null) {
-            if (visitedLeft.contains(left) || visitedRight.contains(right)) {
+        var nextLeft = leftHead;
+        var fastLeft = leftHead;
+        var nextRight = rightHead;
+        var fastRight = rightHead;
+        while (nextLeft != null  && nextRight != null) {
+            if (!function.apply(nextLeft, nextRight)) {
                 return false;
             }
-            if (!function.apply(left, right)) {
+            nextLeft = nextLeft.nextNode;
+            if (fastLeft != null && fastLeft.nextNode != null) {
+                fastLeft = fastLeft.nextNode.nextNode;
+            } else {
+                fastLeft = null;
+            }
+            nextRight = nextRight.nextNode;
+            if (fastRight != null && fastRight.nextNode != null) {
+                fastRight = fastRight.nextNode.nextNode;
+            } else {
+                fastRight = null;
+            }
+            if ((nextLeft != null && nextLeft == fastLeft) || (nextRight != null && nextRight == fastRight)) {
                 return false;
             }
-            visitedRight.add(right);
-            visitedLeft.add(left);
-            left = left.nextNode;
-            right = right.nextNode;
         }
-        if (left == null && right == null) {
+        if (nextLeft == null && nextRight == null) {
             return true;
         }
         return false;
@@ -90,15 +108,19 @@ public final class ListNode<T> {
 
 
     private static <T> void circularBreaker(ListNode<T> listNode, Consumer<ListNode<T>> function) {
-        Set<ListNode<T>> visitedNodes = new HashSet<>();
         var next = listNode.nextNode;
+        var fast = listNode.nextNode;
         while (next != null) {
-            if (visitedNodes.contains(next)) {
-                break;
-            }
             function.accept(next);
-            visitedNodes.add(next);
             next = next.nextNode;
+            if (fast != null && fast.nextNode != null) {
+                fast = fast.nextNode.nextNode;
+            } else {
+                fast = null;
+            }
+            if (next != null && fast == next) {
+                return;
+            }
         }
 
     }
